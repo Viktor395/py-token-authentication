@@ -60,7 +60,11 @@ class MovieViewSet(
     mixins.RetrieveModelMixin,
     GenericViewSet
 ):
-    queryset = Movie.objects.all().prefetch_related("genres", "actors").order_by("title")
+    queryset = (
+        Movie.objects.all()
+        .prefetch_related("genres", "actors")
+        .order_by("title")
+    )
     serializer_class = MovieSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
@@ -72,9 +76,11 @@ class MovieViewSet(
 
         if title:
             queryset = queryset.filter(title__icontains=title)
+
         if genres:
             genres_ids = [int(str_id) for str_id in genres.split(",")]
             queryset = queryset.filter(genres__id__in=genres_ids)
+
         if actors:
             actors_ids = [int(str_id) for str_id in actors.split(",")]
             queryset = queryset.filter(actors__id__in=actors_ids)
@@ -90,7 +96,11 @@ class MovieViewSet(
 
 
 class MovieSessionViewSet(viewsets.ModelViewSet):
-    queryset = MovieSession.objects.all().select_related("movie", "cinema_hall").order_by("show_time")
+    queryset = (
+        MovieSession.objects.all()
+        .select_related("movie", "cinema_hall")
+        .order_by("show_time")
+    )
     serializer_class = MovieSessionSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
@@ -110,6 +120,7 @@ class MovieSessionViewSet(viewsets.ModelViewSet):
         if date:
             date_obj = datetime.strptime(date, "%Y-%m-%d").date()
             queryset = queryset.filter(show_time__date=date_obj)
+
         if movie_id:
             queryset = queryset.filter(movie_id=int(movie_id))
 
@@ -128,10 +139,14 @@ class OrderViewSet(
     mixins.CreateModelMixin,
     GenericViewSet,
 ):
-    queryset = Order.objects.all().prefetch_related(
-        "tickets__movie_session__movie",
-        "tickets__movie_session__cinema_hall"
-    ).order_by("-created_at")
+    queryset = (
+        Order.objects.all()
+        .prefetch_related(
+            "tickets__movie_session__movie",
+            "tickets__movie_session__cinema_hall"
+        )
+        .order_by("-created_at")
+    )
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
 
